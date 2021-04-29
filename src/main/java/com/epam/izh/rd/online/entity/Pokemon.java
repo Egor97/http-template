@@ -1,19 +1,29 @@
 package com.epam.izh.rd.online.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Objects;
+
 /**
  * Покемон. Поля должны заполняться из JSON, который возвратит внешний REST-service
  * Для маппинга значений из массива stats рекомендуется использовать отдельный класс Stat и аннотацию @JsonCreator
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Pokemon {
 
     /**
      * Уникальный идентификатор, маппится из поля pokemonId
      */
+
+    @JsonProperty("id")
     private long pokemonId;
 
     /**
      * Имя покемона, маппится из поля pokemonName
      */
+
+    @JsonProperty("name")
     private String pokemonName;
 
     /**
@@ -31,4 +41,83 @@ public class Pokemon {
      */
     private short defense;
 
+    public Pokemon() {
+    }
+
+    public Pokemon(long pokemonId, String pokemonName) {
+        this.pokemonId = pokemonId;
+        this.pokemonName = pokemonName;
+    }
+
+//    public Pokemon(long pokemonId, String pokemonName, short hp, short attack, short defense) {
+//        this.pokemonId = pokemonId;
+//        this.pokemonName = pokemonName;
+//        this.hp = hp;
+//        this.attack = attack;
+//        this.defense = defense;
+//    }
+
+    public long getPokemonId() {
+        return pokemonId;
+    }
+
+    public void setPokemonId(long pokemonId) {
+        this.pokemonId = pokemonId;
+    }
+
+    public String getPokemonName() {
+        return pokemonName;
+    }
+
+    public void setPokemonName(String pokemonName) {
+        this.pokemonName = pokemonName;
+    }
+
+    public short getHp() {
+        return hp;
+    }
+
+    public void setHp(short hp) {
+        this.hp = hp;
+    }
+
+    public short getAttack() {
+        return attack;
+    }
+
+    public void setAttack(short attack) {
+        this.attack = attack;
+    }
+
+    public short getDefense() {
+        return defense;
+    }
+
+    public void setDefense(short defense) {
+        this.defense = defense;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pokemon pokemon = (Pokemon) o;
+        return pokemonId == pokemon.pokemonId && hp == pokemon.hp && attack == pokemon.attack && defense == pokemon.defense && pokemonName.equals(pokemon.pokemonName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pokemonId, pokemonName, hp, attack, defense);
+    }
+
+    @Override
+    public String toString() {
+        return "Pokemon{" +
+                "pokemonId=" + pokemonId +
+                ", pokemonName='" + pokemonName + '\'' +
+                ", hp=" + hp +
+                ", attack=" + attack +
+                ", defense=" + defense +
+                '}';
+    }
 }
