@@ -2,7 +2,17 @@ package com.epam.izh.rd.online.service;
 
 import com.epam.izh.rd.online.entity.Pokemon;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class PokemonFightingClubServiceImpl implements PokemonFightingClubService {
+
+    PokemonFetchingServiceImpl pokemonFetchingService;
+
+    public PokemonFightingClubServiceImpl(PokemonFetchingServiceImpl pokemonFetchingService) {
+        this.pokemonFetchingService = pokemonFetchingService;
+    }
+
     @Override
     public Pokemon doBattle(Pokemon p1, Pokemon p2) {
         Pokemon first;
@@ -21,7 +31,6 @@ public class PokemonFightingClubServiceImpl implements PokemonFightingClubServic
             if (second.getHp() > 0) {
                 doDamage(first, second);
                 if (second.getHp() <= 0) {
-                    System.out.println(second.getPokemonName() + " have " + second.getHp() + " hp");
                     winner = first;
                     break;
                 }
@@ -30,7 +39,6 @@ public class PokemonFightingClubServiceImpl implements PokemonFightingClubServic
             if (first.getHp() > 0) {
                 doDamage(second, first);
                 if (first.getHp() <= 0) {
-                    System.out.println(first.getPokemonName() + " have " + first.getHp() + " hp");
                     winner = second;
                     break;
                 }
@@ -42,7 +50,14 @@ public class PokemonFightingClubServiceImpl implements PokemonFightingClubServic
 
     @Override
     public void showWinner(Pokemon winner) {
-
+        try {
+            FileOutputStream fos = new FileOutputStream("src/main/java/com/epam/izh/rd/online/images/" +
+                    winner.getPokemonName() + ".jpg");
+            fos.write(pokemonFetchingService.getPokemonImage(winner.getPokemonName()));
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

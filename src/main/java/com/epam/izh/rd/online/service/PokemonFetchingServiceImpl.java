@@ -3,16 +3,16 @@ package com.epam.izh.rd.online.service;
 import com.epam.izh.rd.online.entity.Pokemon;
 import com.epam.izh.rd.online.factory.ObjectMapper;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PokemonFetchingServiceImpl implements PokemonFetchingService {
 
-    ObjectMapper mapper;
-    Pokemon pokemon = new Pokemon();
+    private final List<Pokemon> pokemonsDB = new ArrayList<>();
+    private final ObjectMapper mapper;
 
     public PokemonFetchingServiceImpl(ObjectMapper objectMapper) {
         this.mapper = objectMapper;
@@ -20,19 +20,18 @@ public class PokemonFetchingServiceImpl implements PokemonFetchingService {
 
     @Override
     public Pokemon fetchByName(String name) throws IllegalArgumentException {
-
+        Pokemon pokemon = null;
         HttpURLConnection connection = null;
-        String query = "https://pokeapi.co/api/v2/pokemon/";
+        String link = "https://pokeapi.co/api/v2/pokemon/";
 
         try {
-            URL url = new URL(query + name);
+            URL url = new URL(link + name);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("user-agent", "application/json");
 
             connection.connect();
 
             StringBuilder sb = new StringBuilder();
-
 
             if (HttpURLConnection.HTTP_OK == connection.getResponseCode()) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -47,6 +46,8 @@ public class PokemonFetchingServiceImpl implements PokemonFetchingService {
 
             try {
                 pokemon = mapper.getObjectMapper().readValue(sb.toString(), Pokemon.class);
+                pokemon.setAllStats();
+                pokemonsDB.add(pokemon);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -58,12 +59,30 @@ public class PokemonFetchingServiceImpl implements PokemonFetchingService {
                 connection.disconnect();
         }
 
-        System.out.println(pokemon.toString());
         return pokemon;
     }
 
     @Override
     public byte[] getPokemonImage(String name) throws IllegalArgumentException {
-        return new byte[0];
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        for (Pokemon pokemon : pokemonsDB) {
+            if (pokemon.getPokemonName().equals(name)) {
+                URL url = pokemon.getSprite().getImage();
+                try (InputStream in = url.openStream()) {
+                    byte[] buf = new byte[1024];
+                    int count;
+                    while (-1!=(count=in.read(buf))) {
+                        out.write(buf, 0, count);
+                    }
+                    in.close();
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return out.toByteArray();
     }
 }
